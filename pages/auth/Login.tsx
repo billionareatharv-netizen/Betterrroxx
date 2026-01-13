@@ -45,7 +45,7 @@ export const Login: React.FC = () => {
         
         <div className="text-center mb-8">
           <Link to="/" className="inline-block mb-6">
-            <span className="text-2xl font-bold text-slate-900 tracking-tight">DevPortfolio</span>
+            <span className="text-2xl font-bold text-slate-900 tracking-tight">Betterr Roxx</span>
           </Link>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
           <p className="text-slate-500">Sign in to access your account</p>

@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
           
           {/* Brand */}
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold tracking-tight text-white">DevPortfolio</h3>
+            <h3 className="text-2xl font-bold tracking-tight text-white">Betterr Roxx</h3>
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
               Empowering local businesses with high-converting, mobile-first web solutions. 
               Let's turn your visitors into customers.
@@ -66,7 +66,7 @@ export const Footer: React.FC = () => {
         </div>
         
         <div className="border-t border-slate-800 mt-16 pt-8 text-center text-slate-500 text-xs flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} DevPortfolio. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Betterr Roxx. All rights reserved.</p>
           <div className="flex gap-6">
             <span className="hover:text-slate-300 cursor-pointer">Privacy Policy</span>
             <span className="hover:text-slate-300 cursor-pointer">Terms of Service</span>

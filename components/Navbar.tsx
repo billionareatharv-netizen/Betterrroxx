@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
               <Code2 className={`h-6 w-6 ${scrolled ? 'text-white' : 'text-white'}`} />
             </div>
             <span className={`font-bold text-xl tracking-tight transition-colors ${textColorClass}`}>
-              DevPortfolio
+              Betterr Roxx
             </span>
           </Link>
           

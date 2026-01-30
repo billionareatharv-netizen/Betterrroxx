@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, ArrowLeft, X } from 'lucide-react';
+import { Save, ArrowLeft, X, UploadCloud } from 'lucide-react';
 import { db } from '../../services/db';
-import { Project, Category } from '../../types';
+import { Project } from '../../types';
 
 export const ProjectForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,14 +55,50 @@ export const ProjectForm: React.FC = () => {
     }));
   };
 
-  // Mock Image Upload logic for demonstration
+  // UPDATED: Convert file to Base64 string for localStorage persistence
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      // In a real app, upload to Firebase Storage here and get URL
-      // For this demo, we create a local object URL
-      const url = URL.createObjectURL(e.target.files[0]);
-      setFormData({ ...formData, imageUrl: url });
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (limit to ~800KB for localStorage safety)
+      if (file.size > 800 * 1024) {
+        alert("File is too large! Please upload an image under 800KB for this demo.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, imageUrl: reader.result as string });
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  // UPDATED: Handle Gallery Uploads
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // Cast Array.from result to File[] to avoid 'unknown' type inference on file variable
+      (Array.from(files) as File[]).forEach(file => {
+         if (file.size > 800 * 1024) return; // Skip large files
+         const reader = new FileReader();
+         reader.onloadend = () => {
+           if (reader.result) {
+             setFormData(prev => ({
+               ...prev,
+               gallery: [...(prev.gallery || []), reader.result as string]
+             }));
+           }
+         };
+         reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      gallery: (prev.gallery || []).filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,9 +121,9 @@ export const ProjectForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto pb-10">
       <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate('/admin/dashboard')} className="text-gray-500 hover:text-gray-900">
+        <button onClick={() => navigate('/admin/dashboard')} className="text-gray-500 hover:text-gray-900 transition-colors">
           <ArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-2xl font-bold text-gray-900">
@@ -95,111 +131,121 @@ export const ProjectForm: React.FC = () => {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-8">
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
+        {/* Main Info Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Project Title</label>
               <input
                 type="text"
                 name="title"
                 required
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                placeholder="e.g. Modern Gym Website"
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="Gym">Gym</option>
-                <option value="Retail">Retail</option>
-                <option value="Salon">Salon</option>
-                <option value="Education">Education</option>
-                <option value="Other">Other</option>
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white"
+                >
+                  <option value="Gym">Gym</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Salon">Salon</option>
+                  <option value="Education">Education</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+               <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Live Demo URL</label>
+                <input
+                  type="url"
+                  name="demoUrl"
+                  value={formData.demoUrl}
+                  onChange={handleChange}
+                  placeholder="https://..."
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                />
+              </div>
             </div>
-            
-             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Live Demo URL</label>
-              <input
-                type="url"
-                name="demoUrl"
-                value={formData.demoUrl}
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Short Description</label>
+              <textarea
+                name="shortDescription"
+                required
+                rows={3}
+                maxLength={150}
+                value={formData.shortDescription}
                 onChange={handleChange}
-                placeholder="https://..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none"
+                placeholder="Brief summary for the card view..."
               />
             </div>
           </div>
 
-          <div>
-             <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
-             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors">
+          <div className="space-y-4">
+             <label className="block text-sm font-semibold text-gray-700">Cover Image</label>
+             <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-all relative group h-64 flex flex-col items-center justify-center">
                {formData.imageUrl ? (
-                 <div className="relative">
-                   <img src={formData.imageUrl} alt="Preview" className="h-48 w-full object-cover rounded-md" />
-                   <button 
-                    type="button" 
-                    onClick={() => setFormData({...formData, imageUrl: ''})}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
-                   >
-                     <X className="h-4 w-4"/>
-                   </button>
-                 </div>
+                 <>
+                   <img src={formData.imageUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover rounded-xl" />
+                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                      <button 
+                        type="button" 
+                        onClick={() => setFormData({...formData, imageUrl: ''})}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg font-medium shadow-lg hover:bg-red-600 transition-colors"
+                      >
+                        Remove Image
+                      </button>
+                   </div>
+                 </>
                ) : (
-                 <div className="py-8">
-                   <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleImageUpload} 
-                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                   />
-                   <p className="text-xs text-gray-400 mt-2">PNG, JPG up to 5MB</p>
+                 <div className="pointer-events-none">
+                   <div className="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-indigo-600">
+                     <UploadCloud className="h-8 w-8"/>
+                   </div>
+                   <p className="text-sm font-medium text-gray-600">Click to upload cover</p>
+                   <p className="text-xs text-gray-400 mt-1">Max size 800KB</p>
                  </div>
                )}
+               <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageUpload} 
+                  className={`absolute inset-0 w-full h-full opacity-0 cursor-pointer ${formData.imageUrl ? 'hidden' : ''}`}
+               />
              </div>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
-          <input
-            type="text"
-            name="shortDescription"
-            required
-            maxLength={150}
-            value={formData.shortDescription}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <p className="text-xs text-gray-400 mt-1">Shown on the project card.</p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Full Description</label>
           <textarea
             name="fullDescription"
-            rows={5}
+            rows={6}
             required
             value={formData.fullDescription}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            placeholder="Detailed case study of the project..."
           ></textarea>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Tech Stack */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Technologies</label>
-            <div className="flex gap-2 mb-2">
+          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Technologies Used</label>
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={techInput}
@@ -211,25 +257,26 @@ export const ProjectForm: React.FC = () => {
               <button 
                 type="button"
                 onClick={() => handleArrayAdd('technologies', techInput, setTechInput)}
-                className="bg-gray-100 px-4 py-2 rounded-lg font-medium hover:bg-gray-200"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               >
                 Add
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.technologies?.map((tech, i) => (
-                <span key={i} className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm">
+                <span key={i} className="inline-flex items-center gap-1 bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm shadow-sm">
                   {tech}
-                  <button type="button" onClick={() => handleArrayRemove('technologies', i)}><X className="h-3 w-3"/></button>
+                  <button type="button" onClick={() => handleArrayRemove('technologies', i)} className="text-gray-400 hover:text-red-500"><X className="h-3 w-3"/></button>
                 </span>
               ))}
+              {formData.technologies?.length === 0 && <p className="text-xs text-gray-400 italic">No technologies added.</p>}
             </div>
           </div>
 
           {/* Features */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Key Features</label>
-            <div className="flex gap-2 mb-2">
+          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Key Features</label>
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={featureInput}
@@ -241,19 +288,51 @@ export const ProjectForm: React.FC = () => {
               <button 
                 type="button"
                 onClick={() => handleArrayAdd('features', featureInput, setFeatureInput)}
-                className="bg-gray-100 px-4 py-2 rounded-lg font-medium hover:bg-gray-200"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               >
                 Add
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.features?.map((feat, i) => (
-                <span key={i} className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm">
+                <span key={i} className="inline-flex items-center gap-1 bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm shadow-sm">
                   {feat}
-                  <button type="button" onClick={() => handleArrayRemove('features', i)}><X className="h-3 w-3"/></button>
+                  <button type="button" onClick={() => handleArrayRemove('features', i)} className="text-gray-400 hover:text-red-500"><X className="h-3 w-3"/></button>
                 </span>
               ))}
+               {formData.features?.length === 0 && <p className="text-xs text-gray-400 italic">No features added.</p>}
             </div>
+          </div>
+        </div>
+
+        {/* Gallery Section */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <label className="block text-sm font-semibold text-gray-700">Project Gallery</label>
+            <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <input type="file" multiple accept="image/*" className="hidden" onChange={handleGalleryUpload} />
+              + Add Images
+            </label>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {formData.gallery?.map((img, idx) => (
+              <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200">
+                <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                <button 
+                  type="button"
+                  onClick={() => removeGalleryImage(idx)}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            {(!formData.gallery || formData.gallery.length === 0) && (
+              <div className="col-span-full py-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-400 text-sm">
+                No gallery images yet.
+              </div>
+            )}
           </div>
         </div>
 
@@ -261,10 +340,10 @@ export const ProjectForm: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 disabled:opacity-70"
+            className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 disabled:opacity-70 transform hover:-translate-y-0.5"
           >
             <Save className="h-5 w-5" />
-            {loading ? 'Saving...' : 'Save Project'}
+            {loading ? 'Saving Project...' : 'Save Project'}
           </button>
         </div>
 

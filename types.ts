@@ -12,6 +12,21 @@ export interface Project {
   createdAt: number;
 }
 
+export interface MobileApp {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  iconUrl: string;
+  screenshots: string[];
+  rating: number; // 1.0 to 5.0
+  downloads: string; // e.g. "10k+"
+  size: string; // e.g. "15 MB"
+  category: string;
+  downloadUrl: string;
+  createdAt: number;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -19,11 +34,4 @@ export interface User {
   role: 'ADMIN' | 'USER';
 }
 
-export interface Service {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-}
-
-export type Category = 'All' | 'Gym' | 'Retail' | 'Salon' | 'Education' | 'Other';
+export type Category = 'All' | 'Hotel' | 'Gym' | 'Restaurant' | 'E-commerce' | 'Corporate' | 'Retail' | 'Salon' | 'Education' | 'Other';

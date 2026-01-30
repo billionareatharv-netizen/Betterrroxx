@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Send } from 'lucide-react';
+import { Mail, MapPin, Send, Instagram } from 'lucide-react';
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', message: '' });
@@ -12,6 +12,7 @@ export const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Using FormSubmit.co to forward emails to betterrroxx@gmail.com
     try {
       await fetch("https://formsubmit.co/ajax/betterrroxx@gmail.com", {
         method: "POST",
@@ -22,7 +23,8 @@ export const Contact: React.FC = () => {
         body: JSON.stringify({
           name: formData.name,
           message: formData.message,
-          _subject: `New Inquiry from ${formData.name}`
+          _subject: `New Portfolio Inquiry from ${formData.name}`,
+          _captcha: "false" // Disable captcha for smoother experience
         })
       });
     } catch (error) {
@@ -47,15 +49,15 @@ export const Contact: React.FC = () => {
              <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Contact Information</h3>
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                  <a href="mailto:Betterrroxx@gmail.com" className="flex items-center gap-4 group cursor-pointer">
+                    <div className="w-12 h-12 bg-indigo-100 group-hover:bg-indigo-600 transition-colors rounded-full flex items-center justify-center text-indigo-600 group-hover:text-white">
                       <Mail className="h-5 w-5" />
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium text-gray-900">betterrroxx@gmail.com</p>
+                      <p className="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">Betterrroxx@gmail.com</p>
                     </div>
-                  </div>
+                  </a>
 
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
@@ -63,19 +65,19 @@ export const Contact: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Location</p>
-                      <p className="font-medium text-gray-900">New York, USA (Available Remotely)</p>
+                      <p className="font-medium text-gray-900">Ghaziabad, Uttar Pradesh 201206</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-8 pt-8 border-t border-gray-100">
                   <a 
-                    href="https://wa.me/15550000000" 
+                    href="https://www.instagram.com/betterr_roxx/" 
                     target="_blank" 
                     rel="noreferrer"
-                    className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold transition-colors shadow-lg shadow-green-200"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white py-3 rounded-lg font-bold transition-colors shadow-lg"
                   >
-                     Chat on WhatsApp
+                     <Instagram className="h-5 w-5" /> Message on Instagram
                   </a>
                 </div>
              </div>
@@ -113,8 +115,6 @@ export const Contact: React.FC = () => {
                   />
                 </div>
                 
-                {/* Phone Input Removed */}
-
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Project Details</label>
                   <textarea

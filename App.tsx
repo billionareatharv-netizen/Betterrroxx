@@ -2,9 +2,12 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { StickyInstagram } from './components/StickyInstagram';
 import { Home } from './pages/Home';
 import { Projects } from './pages/Projects';
 import { ProjectDetails } from './pages/ProjectDetails';
+import { Apps } from './pages/Apps';
+import { AppDetails } from './pages/AppDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Login } from './pages/auth/Login';
@@ -12,6 +15,7 @@ import { Signup } from './pages/auth/Signup';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { Dashboard } from './pages/admin/Dashboard';
 import { ProjectForm } from './pages/admin/ProjectForm';
+import { AppForm } from './pages/admin/AppForm';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const ScrollToTop = () => {
@@ -44,6 +48,8 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/apps" element={<Apps />} />
+          <Route path="/apps/:id" element={<AppDetails />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           
@@ -62,9 +68,13 @@ const AppContent: React.FC = () => {
             <Route path="projects" element={<Dashboard />} />
             <Route path="projects/new" element={<ProjectForm />} />
             <Route path="projects/edit/:id" element={<ProjectForm />} />
+            {/* New App Routes */}
+            <Route path="apps/new" element={<AppForm />} />
+            <Route path="apps/edit/:id" element={<AppForm />} />
           </Route>
         </Routes>
       </div>
+      <StickyInstagram />
       <Footer />
     </>
   );
